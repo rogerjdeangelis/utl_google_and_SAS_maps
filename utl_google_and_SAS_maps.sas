@@ -193,24 +193,16 @@ Obs       LON        LAT
 ;
 
 
-%utl_submit_wps64('
-options set=R_HOME "C:/Program Files/R/R-3.3.2";
-libname sd1 "d:/sd1";
-proc r;
-submit;
+%utl_submit_r64('
 source("c:/Program Files/R/R-3.3.2/etc/Rprofile.site",echo=T);
+library(ggmap);
 library(haven);
-library("ggmap");
-have<-read_sas("d:/sd1/have.sas7bdat");
-lonlat_sample <- c(NA,NA);
-for ( i in 1:2) {
-  lonlat_sample <- rbind(lonlat_sample, as.numeric(geocode(have$ADR[i])));
-};
-want<-as.data.frame(lonlat_sample)[2:3,];
-colnames(want)<-c("lon","lat");
-endsubmit;
-import r=want data=sd1.lonlat;
-run;quit;
+lonlat=read_sas("d:/sd1/lonlat.sas7bdat");
+nyc_base <- ggmap::get_map("New York City", zoom = 14);
+ggmap(nyc_base) + geom_point(data=lonlat,
+  aes(x=LON, y=LAT), color="red", size=10, alpha=0.5);
+ggsave("d:/pdf/manhattan.pdf", width = 20, height = 20, units = "cm")
 ');
+
 
 
